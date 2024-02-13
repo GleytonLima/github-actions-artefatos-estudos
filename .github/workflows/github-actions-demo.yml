@@ -1,0 +1,39 @@
+name: Python Script
+
+on:
+  workflow_dispatch:
+    inputs:
+      document_id:
+        description: "Id of the document (Optional, if not provided, it will create a new document)"
+
+jobs:
+  run-python-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+
+      - name: Set up Python
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.x
+
+      - name: Download workflows if is present
+        continue-on-error: true
+        uses: actions/download-artifact@v2
+        with:
+          name: saved_data
+          path: ./workflows
+
+      - name: List Files and Execute Python script
+        run: |
+          ls -la
+          ls -la workflows
+          python script.py ${{ github.event.inputs.document_id }}
+      - name: Upload workflows as an artifact
+        if: always()
+        uses: actions/upload-artifact@v2
+        with:
+          name: saved_data
+          path: ./workflows
